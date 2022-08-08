@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.Date;
 
 public class User {
+
     int userId;
     String username;
     String password;
@@ -554,16 +555,15 @@ public class User {
             }
             resultSet=statement.executeQuery("SELECT * FROM followers");
             while (resultSet.next()){
-                   boolean flag=true;
+
                 for (Integer following : followings) {
-                    if (resultSet.getInt("follower") == following)
-                        for (Integer integer : followings) {
-                            if (resultSet.getInt("userID") == integer) {
-                                flag = false;
-                                break;
-                            }
+                    if (resultSet.getInt("follower") == following) {
+
+                        if (resultSet.getInt("userID") == userId) {
+                            break;
                         }
-                     if(flag)  followingUsers.add(resultSet.getInt("userID"));
+                        followingUsers.add(resultSet.getInt("userID"));
+                    }
                 }
 
             }
@@ -607,26 +607,99 @@ public class User {
             username.add(resultSet.getString("username"));
         }
 
+        int size2=suggestionUser.size();
+
         System.out.println("suggested users :");
 
-        if(size<=5){
-           for (int i = size-2; i>size-4; i--){
+        if(size2<=3){
+           for (int i = size2-1; i>size2-2; i--){
                System.out.println(username.get(i));
            }
         }
-        else if(size<=10){
-          for (int i = size-2; i>size-6; i--){
+        else if(size2<=10){
+          for (int i = size2-1; i>size2-4; i--){
               System.out.println(username.get(i));
           }
         }
         else {
-         for (int i = size-2; i>size-8; i--){
+         for (int i = size2-1; i>size2-7; i--){
              System.out.println(username.get(i));
          }
 
         }
         System.out.println("_________________________________");
 
+    }
+
+    public void adPosts() throws SQLException {
+
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", "root", "09012012492");
+        Statement statement=connection.createStatement();
+        statement.executeUpdate("use app");
+        ResultSet resultSet=statement.executeQuery("SELECT * FROM followers where follower="+this.userId+"");
+        ArrayList<Integer> followingUserID=new ArrayList<>();
+
+        while (resultSet.next())
+            followingUserID.add(resultSet.getInt("userID"));
+
+        ArrayList<Integer> commercialUsers=new ArrayList<>();
+
+        for (Integer integer : followingUserID) {
+
+            ResultSet resultSet1 = statement.executeQuery("SELECT * FROM users where userID=" + integer + "");
+            while (resultSet1.next())
+                if (resultSet1.getString("business").equals("commercialUser"))
+                    commercialUsers.add(resultSet1.getInt("userID"));
+        }
+
+        ArrayList<String> username=new ArrayList<>();
+        ArrayList<String> caption=new ArrayList<>();
+        ArrayList<String> date=new ArrayList<>();
+
+        for (Integer commercialUser : commercialUsers) {
+
+            ResultSet resultSet1 = statement.executeQuery("select * from posts where userID=" + commercialUser + "");
+            while (resultSet1.next()) {
+
+                username.add(userIDToUsername(resultSet1.getInt("userID")));
+                caption.add(resultSet1.getString("caption"));
+                date.add(resultSet1.getString("date"));
+            }
+        }
+
+        if (username.size()<=3){
+
+            System.out.println("ad Posts :");
+            for (int i = 0; i < username.size(); i++) {
+                System.out.println(username.get(i)+" : "+caption.get(i)+"       "+date.get(i));
+                System.out.println("-------------------------------------------");
+            }
+            System.out.println("____________________________________________________");
+        }
+        else {
+
+            System.out.println("ad Posts :");
+            for (int i=username.size()-1;i>=username.size()-3;i--){
+                System.out.println(username.get(i)+" : "+caption.get(i)+"       "+date.get(i));
+                System.out.println("-------------------------------------------");
+            }
+            System.out.println("____________________________________________________");
+        }
+
+
+    }
+
+    public String userIDToUsername(int userID) throws SQLException {
+
+        String username="";
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", "root", "09012012492");
+        Statement statement=connection.createStatement();
+        statement.executeUpdate("use app");
+        ResultSet resultSet=statement.executeQuery("select * from users where userID="+userID+"");
+        while (resultSet.next())
+            username=resultSet.getString("username");
+
+        return username;
     }
 
     public static HashMap<Integer, Integer>
@@ -768,8 +841,20 @@ public class User {
 
     }
 
-    public void adPosts(){
+    public void showUsers() throws SQLException {
 
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", "root", "09012012492");
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("use app");
+
+        System.out.println("list of users:");
+
+        ResultSet resultSet=statement.executeQuery("SELECT * from users ");
+        while (resultSet.next())
+            if (resultSet.getInt("userID")!=this.userId)
+            System.out.println(resultSet.getInt("userID")+" : "+resultSet.getString("username"));
+
+        System.out.println("___________________________________________");
     }
 
 }

@@ -63,6 +63,7 @@ public class InputProcess {
         User user=new User(username,password);
         user.forgetPassword=passwordHint;
         user.saveData();
+        user.getUserID();
 
         return user;
     }
@@ -168,8 +169,9 @@ public class InputProcess {
         System.out.println("7-private chats");
         System.out.println("8-group chats");
         System.out.println("9-suggested users");
-        System.out.println("10-logout");
-        System.out.println("11-exit");
+        System.out.println("10-advertisement posts");
+        System.out.println("11-logout");
+        System.out.println("12-exit");
     }
 
     public static void logout(){

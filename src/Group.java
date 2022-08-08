@@ -45,7 +45,7 @@ public class Group {
             Statement statement1=connection.createStatement();
             statement.executeUpdate("use app");
 
-
+            this.pin=0;
 
             ResultSet resultSet=statement.executeQuery("SELECT * FROM group_message WHERE groupID ="+groupID+"");
             while (resultSet.next())
@@ -281,6 +281,8 @@ public class Group {
                 newGroup(userID);
             }
             if (value==2){
+
+                showGroups(userID);
                 System.out.println("please enter a groupID to showGroupChatInfo!");
                 int groupID=scanner.nextInt();
                 selectGroup(groupID,userID);
@@ -326,6 +328,30 @@ public class Group {
         }
         else
             System.out.println("you aren't member in this group!");
+
+    }
+
+    public static void showGroups(int userID) throws SQLException {
+
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", "root", "09012012492");
+        Statement statement=connection.createStatement();
+        statement.executeUpdate("use app");
+        ResultSet resultSet=statement.executeQuery("SELECT * from group_user WHERE userID="+userID+"");
+
+        ArrayList<Integer> groupID=new ArrayList<>();
+        while (resultSet.next()){
+            groupID.add(resultSet.getInt("groupID"));
+        }
+
+        System.out.println("list of groupChats :");
+        for (Integer integer : groupID) {
+
+            ResultSet resultSet1 = statement.executeQuery("select * from group_chat where groupID=" + integer + "");
+            while (resultSet1.next())
+                System.out.println(resultSet1.getInt("groupID") + " : " + resultSet1.getString("name"));
+
+        }
+        System.out.println("_____________________________________________");
 
     }
 

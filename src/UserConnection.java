@@ -29,6 +29,7 @@ public class UserConnection {
             }
             else if(value==3){
 
+                user.showUsers();
                 System.out.println("please enter a userID to showUserPage!");
                 int userID=scanner.nextInt();
                 User user2=User.getUser(userID);
@@ -61,10 +62,13 @@ public class UserConnection {
             else if (value==9){
               user.suggestion();
             }
-            else if(value==10){
-              InputProcess.logout();
+            else if (value==10){
+              user.adPosts();
             }
             else if(value==11){
+              InputProcess.logout();
+            }
+            else if(value==12){
               System.exit(0);
             }
 

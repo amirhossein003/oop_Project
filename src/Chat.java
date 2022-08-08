@@ -63,7 +63,7 @@ public class Chat {
             Statement statement1=connection.createStatement();
             statement.executeUpdate("use app");
 
-
+            this.pin=0;
 
             ResultSet resultSet=statement.executeQuery("SELECT * FROM chat_message WHERE chatID ="+chatID+"");
             while (resultSet.next())
@@ -171,6 +171,8 @@ public class Chat {
                 newChat(UserID,userID);
             }
             if (value==2){
+
+                showPrivateChats(UserID);
                 System.out.println("please enter a chatID to chat!");
                 int chatID=scanner.nextInt();
                 selectChat(chatID,UserID);
@@ -185,12 +187,24 @@ public class Chat {
    public static void newChat(int UserID1,int userID2) throws SQLException {
        Connection connection= DriverManager.getConnection("jdbc:mysql://localhost:3306/","root","09012012492");
        Statement statement= connection.createStatement();
+       Statement statement1= connection.createStatement();
+       Statement statement2= connection.createStatement();
        statement.executeUpdate("use app");
        ResultSet resultSet=statement.executeQuery("SELECT * from users WHERE userID="+userID2+"");
 
            if (resultSet.next()) {
-               statement.executeUpdate("INSERT INTO  chats (userID1,userID2) values (" + UserID1 + "," + userID2 + ")");
-               System.out.println("chat created successfully!");
+
+               ResultSet resultSet1=statement1.executeQuery("select * from chats where userID1="+UserID1+" and" +
+                       " userID2="+userID2+"");
+               ResultSet resultSet2=statement2.executeQuery("select * from chats where userID1="+userID2+" and" +
+                       " userID2="+UserID1+"");
+               if (resultSet1.next() || resultSet2.next()){
+                   System.out.println("You have an active chat with this user!");
+               }
+               else {
+                   statement.executeUpdate("INSERT INTO  chats (userID1,userID2) values (" + UserID1 + "," + userID2 + ")");
+                   System.out.println("chat created successfully!");
+               }
            } else
                System.out.println("userID not found! please try again");
 
@@ -209,6 +223,47 @@ public class Chat {
            }
 
    }
+
+   public static void showPrivateChats(int userID) throws SQLException {
+
+       Connection connection= DriverManager.getConnection("jdbc:mysql://localhost:3306/","root","09012012492");
+       Statement statement= connection.createStatement();
+       statement.executeUpdate("use app");
+       ResultSet resultSet=statement.executeQuery("select * from chats where userID1="+userID+" or userID2="+userID+"");
+       ArrayList<Integer> UserID=new ArrayList<>();
+       ArrayList<Integer> chatID=new ArrayList<>();
+
+
+       while (resultSet.next()){
+           if (resultSet.getInt("userID1")!=userID){
+               UserID.add(resultSet.getInt("userID1"));
+               chatID.add(resultSet.getInt("chatID"));
+           }
+           if (resultSet.getInt("userID2")!=userID) {
+               UserID.add(resultSet.getInt("userID2"));
+               chatID.add(resultSet.getInt("chatID"));
+           }
+       }
+
+       System.out.println("list of privateChats :");
+       for (int i = 0; i < UserID.size(); i++) {
+           System.out.println( chatID.get(i) + " : " + userIDToUsername(UserID.get(i)));
+       }
+       System.out.println("___________________________________________________");
+   }
+
+    public static String userIDToUsername(int userID) throws SQLException {
+
+        String username="";
+        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", "root", "09012012492");
+        Statement statement=connection.createStatement();
+        statement.executeUpdate("use app");
+        ResultSet resultSet=statement.executeQuery("select * from users where userID="+userID+"");
+        while (resultSet.next())
+            username=resultSet.getString("username");
+
+        return username;
+    }
 
    public static void showChatInfo(int chatID) throws SQLException, ParseException {
 
